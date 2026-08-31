@@ -14,7 +14,7 @@ It also states that a simple budget-versus-actual summary is not sufficient — 
 ## Findings
 
 For readability, the findings are presented as a formatted page:
-**[docs/vessel_cost_findings.html](docs/vessel_cost_findings.html)** 
+**[docs/vessel_cost_findings.html](https://krishna-engineer.github.io/cost-control/vessel_cost_findings.html)** 
 
 While actual MD file is present at [`brain_storming/01_findings.md`](brain_storming/01_findings.md).
 
