@@ -186,7 +186,7 @@ V1007: -1.5 => 2.3 => -5.1
 
 
 
-## 5. Relationship between cost variance and deffered exposure details
+## 6. Relationship between cost variance and deffered exposure details
 
 | Vessel_ID | Estimated_Deferred_Exposure_USD | Handover_Risk | Variance_Pct | Management_Status |
 |-----------|--------------------------------:|:-------------:|-------------:|-------------------|
