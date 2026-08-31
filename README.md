@@ -13,7 +13,7 @@ It also states that a simple budget-versus-actual summary is not sufficient — 
 
 ## Findings
 
-The findings are in [`brainstorming/01_findings.md`](brainstorming/01_findings.md).
+The findings are in [`brain_storming/01_findings.md`](brain_storming/01_findings.md).
 
 For readability, the same content is also presented as a formatted page:
 **[docs/vessel_cost_findings.html](docs/vessel_cost_findings.html)** 
@@ -55,7 +55,7 @@ findings file.
 
 This submission is partial as I got short time to work on this, but I am stopping at a point where the findings are supported. 
 
-[`brainstorming/02_next_steps.md`](brainstorming/02_next_steps.md) sets out where the analysis
+[`brain_storming/02_next_steps.md`](brain_storming/02_next_steps.md) sets out where the analysis
 will go next.
 
 ---
