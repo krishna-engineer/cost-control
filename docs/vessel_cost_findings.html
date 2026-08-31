@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vessel Cost Control — Findings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1E28;
+  --ink-soft:#3B4C57;
+  --ink-faint:#6C7C86;
+  --paper:#EDF1EF;
+  --paper-2:#F7F9F8;
+  --sounding:#1D4E6B;
+  --caution:#A8145E;
+  --caution-pale:#F3DCE7;
+  --hull:#123240;
+  --rule:#C3CFCB;
+  --measure:34rem;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.62;
+  font-variant-numeric:tabular-nums;
+}
+
+.wrap{max-width:60rem;margin:0 auto;padding:0 1.75rem}
+.prose{max-width:var(--measure)}
+
+/* ---------- hero ---------- */
+.hero{
+  background:var(--hull);
+  color:#DCE6E4;
+  padding:4.5rem 0 3.6rem;
+}
+.hero h1{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-weight:600;
+  font-size:clamp(2rem,5vw,3.2rem);
+  line-height:1.1;
+  letter-spacing:-0.018em;
+  margin:0 0 1.1rem;
+  max-width:24ch;
+  color:#FFF;
+}
+.hero .standfirst{
+  max-width:52ch;
+  color:#A9C0C4;
+  font-size:1.05rem;
+  margin:0 0 2.8rem;
+}
+.docmeta{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.72rem;
+  letter-spacing:.06em;
+  color:#7C9AA0;
+  margin:0 0 2.2rem;
+}
+.contrast{
+  display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;
+  max-width:44rem;border-top:1px solid #2E5568;padding-top:1.6rem;
+}
+.contrast .v{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.78rem;color:#8FB3BA;letter-spacing:.04em;margin:0;
+}
+.contrast .n{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:clamp(1.4rem,3.6vw,2rem);
+  color:#FFF;line-height:1.15;margin:.15rem 0 .1rem;
+}
+.contrast .c{font-size:.9rem;color:#A9C0C4;line-height:1.45;margin:0}
+.contrast .flag .n{color:#FF8FC0}
+
+/* ---------- shared ---------- */
+section{padding:3.4rem 0}
+.band{background:var(--paper-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+
+h2{
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-weight:600;font-size:1.66rem;line-height:1.2;
+  letter-spacing:-0.012em;margin:0 0 .85rem;max-width:28ch;
+}
+h3{
+  font-family:"IBM Plex Sans",sans-serif;
+  font-weight:600;font-size:1.02rem;
+  margin:2.2rem 0 .55rem;color:var(--hull);
+}
+p{margin:0 0 1rem;max-width:var(--measure)}
+ul{margin:0 0 1rem;padding-left:1.15rem;max-width:var(--measure)}
+li{margin-bottom:.35rem}
+.lede{font-size:1.08rem;color:var(--ink-soft)}
+.tag{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem;letter-spacing:.09em;color:var(--sounding);
+  margin:0 0 .7rem;
+}
+em{font-style:italic}
+strong{font-weight:600}
+code{
+  font-family:"IBM Plex Mono",monospace;font-size:.86em;
+  background:#E1E8E5;padding:.08em .34em;border-radius:2px;
+}
+
+/* approach list: the analysis genuinely ran in this order */
+.method{list-style:none;padding:0;margin:1.6rem 0 0;counter-reset:s;max-width:44rem}
+.method li{
+  counter-increment:s;position:relative;
+  padding:0 0 1.2rem 3.1rem;margin:0 0 1.2rem;
+  border-bottom:1px solid var(--rule);
+}
+.method li:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.method li::before{
+  content:counter(s);position:absolute;left:0;top:.05rem;
+  font-family:"IBM Plex Mono",monospace;font-size:.8rem;
+  width:1.85rem;height:1.85rem;border:1px solid var(--sounding);
+  color:var(--sounding);border-radius:50%;
+  display:grid;place-items:center;
+}
+.method b{display:block;font-weight:600;margin-bottom:.15rem}
+.method span{color:var(--ink-soft);font-size:.96rem}
+
+/* tables as ledgers */
+.tw{overflow-x:auto;margin:1.4rem 0 1.1rem;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:30rem}
+caption{
+  text-align:left;font-family:"IBM Plex Mono",monospace;
+  font-size:.71rem;letter-spacing:.06em;color:var(--ink-faint);
+  padding-bottom:.6rem;
+}
+th,td{padding:.42rem .7rem;text-align:right;border-bottom:1px solid var(--rule)}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th{
+  font-weight:500;font-size:.75rem;color:var(--ink-faint);
+  border-bottom:1.5px solid var(--ink-soft);
+  font-family:"IBM Plex Mono",monospace;letter-spacing:.03em;
+}
+td{font-family:"IBM Plex Mono",monospace;font-size:.86rem}
+td:first-child{font-family:"IBM Plex Sans",sans-serif;font-size:.9rem}
+tr.mark td{background:var(--caution-pale)}
+tr.quiet td{color:var(--ink-faint)}
+.up{color:var(--caution);font-weight:500}
+.dn{color:var(--sounding)}
+
+/* decisions: chart-magenta cautionary marks */
+.note{
+  border-left:2px solid var(--caution);
+  background:var(--caution-pale);
+  padding:1rem 1.15rem;margin:1.5rem 0;
+  max-width:44rem;
+}
+.note p{margin:0;max-width:none;font-size:.96rem}
+.note p + p{margin-top:.6rem}
+.note .h{
+  font-family:"IBM Plex Mono",monospace;font-size:.7rem;
+  letter-spacing:.08em;color:var(--caution);display:block;margin-bottom:.4rem;
+}
+
+.finding{border-top:2px solid var(--hull);padding-top:1.6rem;margin-top:3rem}
+.finding:first-of-type{margin-top:0}
+
+footer{background:var(--hull);color:#9FB6BA;padding:2.4rem 0;font-size:.88rem}
+footer p{max-width:44rem;color:#9FB6BA}
+
+@media(max-width:640px){
+  body{font-size:16px}
+  .contrast{grid-template-columns:1fr;gap:1.3rem}
+  section{padding:2.5rem 0}
+  h2{font-size:1.42rem}
+}
+@media print{
+  body{background:#fff}
+  .hero,footer{background:#fff;color:#000}
+  .hero h1,.contrast .n{color:#000}
+  .finding{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="docmeta">Vessel cost control review · 14 vessels · Jan 2024 – Jul 2026</p>
+    <h1>The vessels with the most deferred exposure are the ones closest to budget</h1>
+    <p class="standfirst">The top five vessels by deferred exposure all sit between −0.75% and +1.42% variance, while the two worst overspenders sit near the bottom of the exposure list — and the risk labels contradict the exposure figures they sit next to.</p>
+
+    <div class="contrast">
+      <div>
+        <p class="v">V1005 · Active · risk label: High</p>
+        <p class="n">8.78% over budget</p>
+        <p class="c">Second-least deferred exposure in the fleet: 74,399.</p>
+      </div>
+      <div class="flag">
+        <p class="v">V1004 · Handover Review · risk label: Low</p>
+        <p class="n">0.57% over budget</p>
+        <p class="c">Second-most deferred exposure in the fleet: 168,702.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="tag">Approach</p>
+    <h2>The order the analysis ran in</h2>
+    <p class="lede prose">Data checks first, then the cost questions — so that anything found later rests on numbers that were verified rather than assumed.</p>
+
+    <ol class="method">
+      <li>
+        <b>Check the sheets against each other</b>
+        <span>Which vessels appear where, and whether the transaction detail adds up to the monthly summary.</span>
+      </li>
+      <li>
+        <b>Investigate the off-budget columns</b>
+        <span>The workbook never states whether unbudgeted spending sits inside the reported actuals or on top of them. Every conclusion about overspending depends on that answer.</span>
+      </li>
+      <li>
+        <b>Compare years on the same months</b>
+        <span>The data stops in July 2026, so every year was restricted to January–July before comparing — the final year is otherwise judged on seven months against twelve.</span>
+      </li>
+      <li>
+        <b>Localise: by vessel, by category, then against deferred exposure</b>
+        <span>From the fleet figure down to which vessels moved, which cost types moved, and how cost performance compares with the handover sheet.</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="tag">Data findings</p>
+    <h2>What the checks on the workbook itself showed</h2>
+
+    <div class="finding">
+      <h3>1 · Four vessels are missing from the handover sheet</h3>
+      <p>Three sheets — <code>Vessel_Master</code>, <code>Monthly_Budget_Actual</code> and <code>Cost_Transactions</code> — all hold the same 14 vessels. <code>Handover_Deferred_Risk</code> holds only 10: V1002, V1007, V1012 and V1013 are absent.</p>
+      <p>That is a real gap, because deferred exposure is the value of work that should have been done but was not — arguably the single most important thing to know about a vessel being handed over.</p>
+      <p>A missing row can mean two opposite things: nothing has been deferred on that vessel, or nobody has assessed it yet. The sheet gives no way to tell which.</p>
+      <p>There is a reason to lean towards <em>not assessed</em>: all four vessels flagged <em>Handover Review</em> in the master sheet are present on the handover sheet, while all four missing vessels are <em>Active</em>.</p>
+      <div class="note">
+        <span class="h">Decision</span>
+        <p>These four vessels are excluded from any deferred-exposure comparison and reported as not assessed.</p>
+      </div>
+    </div>
+
+    <div class="finding">
+      <h3>2 · The two spending sheets agree, apart from rounding</h3>
+      <p>Adding up <code>Amount_USD</code> from the transactions and comparing against <code>Actual_USD</code> in the monthly sheet: all 3,472 rows matched on structure, with nothing orphaned on either side.</p>
+      <p>690 rows differed in amount by more than one cent — but the largest single difference was <code>0.02</code>, and the total across every row was <code>10.28</code>.</p>
+      <p>The pattern fits rounding and nothing else. If the two sheets genuinely disagreed about spending, the differences would vary in size.</p>
+    </div>
+
+    <div class="finding">
+      <h3>3 · The curious case of Off_Budget_USD</h3>
+      <p>Because the reconciliation above used all transactions regardless of budget status, it also establishes that non-budgeted spend sits <em>inside</em> <code>Actual_USD</code>.</p>
+      <p>One row from the monthly sheet — vessel <strong>V1008</strong>, <strong>March 2024</strong>, <strong>Logistics &amp; Freight</strong>:</p>
+
+      <div class="tw">
+        <table>
+          <caption>Monthly_Budget_Actual</caption>
+          <thead><tr><th>Budget</th><th>Actual</th><th>Off_Budget</th><th>Variance</th></tr></thead>
+          <tbody><tr><td>3,629.62</td><td>4,658.79</td><td>115.07</td><td>1,029.17</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="tw">
+        <table>
+          <caption>Cost_Transactions, same vessel, month and category</caption>
+          <thead><tr><th>ID</th><th>Date</th><th>Theme</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>T005264</td><td>21 Mar</td><td>Sea freight</td><td>1,259.88</td><td>Non-Budgeted</td></tr>
+            <tr><td>T005265</td><td>13 Mar</td><td>Local delivery</td><td>3,398.91</td><td>Budgeted</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Finding 1 — off-budget spending is inside the actuals.</strong> The two transactions add to 4,658.79, which is exactly <code>Actual_USD</code>. The non-budgeted transaction is one of the things being summed, and this holds across all 228 off-budget cells.</p>
+
+      <p><strong>Finding 2 — the off-budget amount does not match its own records.</strong> The monthly sheet reports 115.07 of off-budget spending; the records show a single non-budgeted transaction of 1,259.88 — eleven times larger. This is not a one-off: across the fleet, non-budgeted transactions total <strong>711,718.50</strong> while the <code>Off_Budget_USD</code> column totals <strong>106,513.80</strong>.</p>
+
+      <p>Both sheets flag the same 228 vessel-month-category cells, so they agree on <em>where</em> unplanned spending happened but highly disagree on how much was spent.</p>
+
+      <h3>What else was checked</h3>
+      <ul>
+        <li>Non-budgeted transactions were expected to cluster on unplanned work like emergency crew travel. They do not.</li>
+        <li>Nine vessels have no unbudgeted spending at all — V1001, V1003, V1004, V1006, V1007, V1009, V1010, V1012, V1014 — and both sheets agree on the nine. With roughly 730 transactions per vessel over 31 months, there is not a single non-budgeted entry on any of them. That is not credible as a description of real operations: over two and a half years, every vessel eventually needs something that was not planned for.</li>
+        <li>Of the nine vessels without non-budgeted spend, seven are present in the deferred sheet and two are not — so the flag says nothing about whether a vessel was assessed for deferred work.</li>
+      </ul>
+
+      <div class="note">
+        <span class="h">Decisions</span>
+        <p><code>Off_Budget_USD</code> is excluded from all analysis. It is a fraction of budget drawn at random.</p>
+        <p><code>Budget_Status</code> is not used to measure unplanned spending. If forced to choose between the two, it is the better-grounded figure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="tag">Cost findings</p>
+    <h2>What the verified numbers show</h2>
+
+    <div class="finding">
+      <h3>4 · Fleet overspend has roughly doubled since 2024</h3>
+      <p>Comparing the same months — January to July — across all three years, since the data stops in July 2026 and that year would otherwise be judged on seven months against twelve:</p>
+      <div class="tw">
+        <table>
+          <caption>Fleet overspend against budget, Jan–Jul</caption>
+          <thead><tr><th>Year</th><th>Overspend</th></tr></thead>
+          <tbody>
+            <tr><td>2024</td><td>1.92%</td></tr>
+            <tr><td>2025</td><td>2.79%</td></tr>
+            <tr class="mark"><td>2026</td><td>3.17%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>This is deterioration that built gradually rather than arriving as an event. The fleet did not have one bad quarter — it drifted, month after month, for two and a half years. Anyone tracking fleet overspend as a percentage of budget would have seen the level moving away from 2% well in time.</p>
+    </div>
+
+    <div class="finding">
+      <h3>5 · The deterioration is concentrated in a handful of vessels</h3>
+      <div class="tw">
+        <table>
+          <caption>Overspend by vessel, Jan–Jul, by year</caption>
+          <thead><tr><th>Vessel</th><th>2024</th><th>2025</th><th>2026</th><th>Change</th></tr></thead>
+          <tbody>
+            <tr class="mark"><td>V1008</td><td>6.6</td><td>9.3</td><td>11.5</td><td class="up">+4.9</td></tr>
+            <tr class="mark"><td>V1007</td><td>−1.8</td><td>−0.2</td><td>2.9</td><td class="up">+4.7</td></tr>
+            <tr class="mark"><td>V1002</td><td>3.5</td><td>8.2</td><td>7.4</td><td class="up">+3.9</td></tr>
+            <tr class="mark"><td>V1013</td><td>2.2</td><td>7.3</td><td>5.9</td><td class="up">+3.7</td></tr>
+            <tr class="mark"><td>V1005</td><td>6.4</td><td>7.9</td><td>9.7</td><td class="up">+3.3</td></tr>
+            <tr class="quiet"><td>V1006</td><td>−2.5</td><td>−1.0</td><td>−0.4</td><td>+2.1</td></tr>
+            <tr class="quiet"><td>V1011</td><td>2.9</td><td>7.2</td><td>4.3</td><td>+1.4</td></tr>
+            <tr class="quiet"><td>V1009</td><td>−0.2</td><td>0.0</td><td>0.7</td><td>+0.9</td></tr>
+            <tr class="quiet"><td>V1012</td><td>0.6</td><td>3.4</td><td>1.5</td><td>+0.9</td></tr>
+            <tr class="quiet"><td>V1003</td><td>2.4</td><td>1.3</td><td>2.5</td><td>+0.1</td></tr>
+            <tr class="quiet"><td>V1004</td><td>2.8</td><td>−1.4</td><td>1.7</td><td>−1.1</td></tr>
+            <tr class="quiet"><td>V1010</td><td>1.1</td><td>−2.3</td><td>−0.0</td><td>−1.1</td></tr>
+            <tr class="quiet"><td>V1014</td><td>2.3</td><td>1.6</td><td>0.5</td><td>−1.8</td></tr>
+            <tr class="quiet"><td>V1001</td><td>2.1</td><td>−1.8</td><td>−2.1</td><td class="dn">−4.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Five vessels deteriorated by more than 3 percentage points between 2024 and 2026, while four improved.</p>
+
+      <h3>Cost categories do not move together at vessel level</h3>
+      <p>Looking at the failing vessels category by category, the same category behaves differently on each. Safety &amp; Compliance:</p>
+      <div class="tw">
+        <table>
+          <caption>Safety &amp; Compliance overspend, by year</caption>
+          <thead><tr><th>Vessel</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+          <tbody>
+            <tr><td>V1008</td><td>8.3</td><td>29.2</td><td class="up">62.9</td></tr>
+            <tr><td>V1002</td><td>5.5</td><td>5.3</td><td>15.8</td></tr>
+            <tr><td>V1007</td><td>0.5</td><td>5.3</td><td>−6.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Or Logistics &amp; Freight:</p>
+      <div class="tw">
+        <table>
+          <caption>Logistics &amp; Freight overspend, by year</caption>
+          <thead><tr><th>Vessel</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+          <tbody>
+            <tr><td>V1008</td><td>11.5</td><td>11.5</td><td>21.6</td></tr>
+            <tr><td>V1002</td><td>8.0</td><td>5.0</td><td>14.9</td></tr>
+            <tr><td>V1007</td><td>−1.5</td><td>2.3</td><td>−5.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="finding">
+      <h3>6 · At fleet level, two categories rise in every year</h3>
+      <div class="tw">
+        <table>
+          <caption>Overspend by category, fleet-wide, Jan–Jul</caption>
+          <thead><tr><th>Category</th><th>2024</th><th>2025</th><th>2026</th><th>Change</th><th>Vessels worse</th></tr></thead>
+          <tbody>
+            <tr class="mark"><td>Safety &amp; Compliance</td><td>1.5</td><td>4.0</td><td>9.3</td><td class="up">+7.8</td><td>10 · 71%</td></tr>
+            <tr class="mark"><td>Repairs &amp; Maintenance</td><td>2.5</td><td>5.9</td><td>7.1</td><td class="up">+4.6</td><td>9 · 64%</td></tr>
+            <tr class="quiet"><td>Spares</td><td>2.6</td><td>4.9</td><td>3.7</td><td>+1.1</td><td>9 · 64%</td></tr>
+            <tr class="quiet"><td>Logistics &amp; Freight</td><td>4.1</td><td>3.7</td><td>4.5</td><td>+0.4</td><td>7 · 50%</td></tr>
+            <tr class="quiet"><td>Stores</td><td>0.8</td><td>0.0</td><td>0.7</td><td>−0.1</td><td>7 · 50%</td></tr>
+            <tr class="quiet"><td>Other Operating Cost</td><td>2.5</td><td>−0.1</td><td>2.1</td><td>−0.4</td><td>5 · 36%</td></tr>
+            <tr class="quiet"><td>Crew Wages</td><td>1.0</td><td>0.8</td><td>0.2</td><td>−0.8</td><td>7 · 50%</td></tr>
+            <tr class="quiet"><td>Crew Travel</td><td>1.7</td><td>2.9</td><td>0.8</td><td>−0.9</td><td>7 · 50%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Two categories rise in every year; the other six are flat or falling. Safety &amp; Compliance goes from 1.5% over budget to 9.3%, and Repairs &amp; Maintenance from 2.5% to 7.1%. They are also the two categories where the most vessels got worse between 2024 and 2026.</p>
+      <p>This gives management a view on fleet-wide control aimed at these two categories:</p>
+      <ul>
+        <li>tighter approval on unplanned maintenance and compliance spend</li>
+        <li>earlier escalation when either runs over</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="tag">Handover finding</p>
+    <h2>Cost variance and deferred exposure disagree</h2>
+
+    <div class="tw">
+      <table>
+        <caption>Vessels ranked by deferred exposure, against cost performance</caption>
+        <thead><tr><th>Vessel</th><th>Deferred exposure</th><th>Risk label</th><th>Variance %</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>V1009</td><td>169,705.52</td><td>Medium</td><td>1.42</td><td>Handover Review</td></tr>
+          <tr class="mark"><td>V1004</td><td>168,701.75</td><td>Low</td><td>0.57</td><td>Handover Review</td></tr>
+          <tr><td>V1014</td><td>167,023.32</td><td>High</td><td>1.15</td><td>Active</td></tr>
+          <tr><td>V1006</td><td>159,314.94</td><td>Medium</td><td>−0.75</td><td>Handover Review</td></tr>
+          <tr><td>V1003</td><td>159,118.85</td><td>Medium</td><td>0.59</td><td>Active</td></tr>
+          <tr><td>V1010</td><td>130,521.61</td><td>Medium</td><td>0.05</td><td>Active</td></tr>
+          <tr><td>V1011</td><td>129,845.28</td><td>Low</td><td>4.25</td><td>Active</td></tr>
+          <tr><td>V1008</td><td>123,953.70</td><td>High</td><td>7.65</td><td>Handover Review</td></tr>
+          <tr class="mark"><td>V1005</td><td>74,399.47</td><td>High</td><td>8.78</td><td>Active</td></tr>
+          <tr><td>V1001</td><td>53,799.19</td><td>Medium</td><td>−1.37</td><td>Active</td></tr>
+          <tr class="quiet"><td>V1002</td><td>not assessed</td><td>—</td><td>5.92</td><td>Active</td></tr>
+          <tr class="quiet"><td>V1007</td><td>not assessed</td><td>—</td><td>−0.50</td><td>Active</td></tr>
+          <tr class="quiet"><td>V1012</td><td>not assessed</td><td>—</td><td>2.15</td><td>Active</td></tr>
+          <tr class="quiet"><td>V1013</td><td>not assessed</td><td>—</td><td>4.11</td><td>Active</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The top five vessels by deferred exposure — V1009, V1004, V1014, V1006, V1003 — all sit between −0.75% and +1.42% variance. The two worst overspenders, V1005 at 8.78% and V1008 at 7.65%, sit near the bottom of the exposure list.</p>
+
+    <h3>The risk labels contradict the exposure figures</h3>
+    <p>The <code>Handover_Risk</code> column does not match the exposure figures it sits next to. V1004, with the second-most deferred exposure, is labelled <em>Low</em>. V1005, with the second-least, is labelled <em>High</em>.</p>
+
+    <div class="note">
+      <span class="h">What this means</span>
+      <p>Something other than the variance report flagged these vessels — or they were selected for reasons the workbook does not record.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Prepared from the supplied workbook: 14 vessels, 31 months (January 2024 – July 2026), 3,472 monthly budget rows reconciled against the transaction detail.</p>
+  </div>
+</footer>
+
+</body>
+</html>
